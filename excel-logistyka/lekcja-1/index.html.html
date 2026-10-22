@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Excel w logistyce — Lekcja 1</title>
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --panel:#ffffff;
+      --text:#1f2937;
+      --muted:#667085;
+      --border:#dfe3ea;
+      --green:#217346;
+      --green-2:#e8f4ed;
+      --blue:#2563eb;
+      --orange:#f59e0b;
+      --red:#dc2626;
+      --ok:#15803d;
+      --shadow:0 10px 28px rgba(16,24,40,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.55;
+    }
+    header{
+      background:linear-gradient(135deg,#185c37,#217346);
+      color:#fff;
+      padding:38px 20px 30px;
+    }
+    .wrap{max-width:1100px;margin:auto;padding:0 20px}
+    h1{margin:0 0 10px;font-size:clamp(28px,5vw,46px)}
+    h2{margin-top:0}
+    h3{margin-bottom:8px}
+    .lead{max-width:850px;font-size:18px;opacity:.95}
+    .topbar{
+      position:sticky;top:0;z-index:10;
+      background:#fff;border-bottom:1px solid var(--border);
+    }
+    .topbar .wrap{
+      display:flex;gap:10px;align-items:center;justify-content:space-between;
+      padding-top:10px;padding-bottom:10px;flex-wrap:wrap;
+    }
+    .progress-shell{height:12px;background:#e5e7eb;border-radius:999px;overflow:hidden;flex:1;min-width:220px}
+    .progress-bar{height:100%;width:0;background:var(--green);transition:.3s}
+    .score{font-weight:700;color:var(--green)}
+    main{padding:26px 0 60px}
+    section{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      padding:24px;
+      margin:20px 0;
+    }
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+    .card{border:1px solid var(--border);border-radius:14px;padding:16px;background:#fff}
+    .card strong{display:block;margin-bottom:4px}
+    .badge{
+      display:inline-block;padding:5px 9px;border-radius:999px;
+      background:var(--green-2);color:var(--green);font-weight:700;font-size:13px;
+    }
+    .callout{
+      border-left:5px solid var(--green);
+      background:var(--green-2);
+      padding:14px 16px;border-radius:10px;
+    }
+    .task{
+      border:1px solid var(--border);
+      border-radius:14px;padding:18px;margin:16px 0;background:#fbfcfe;
+    }
+    .task.done{border-color:#8bd3a7;background:#f0fbf4}
+    button{
+      border:0;border-radius:10px;padding:11px 15px;
+      font-weight:700;cursor:pointer;font-size:15px;
+      background:var(--green);color:#fff;
+    }
+    button.secondary{background:#eef2f7;color:#27364a}
+    button:hover{filter:brightness(.97)}
+    input,select{
+      width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:9px;
+      font-size:16px;background:#fff;
+    }
+    label{font-weight:600;display:block;margin:8px 0 5px}
+    .feedback{min-height:26px;margin-top:8px;font-weight:700}
+    .ok{color:var(--ok)} .bad{color:var(--red)}
+    .excel{
+      border:1px solid #aab2bd;border-radius:10px;overflow:auto;background:#fff;margin-top:15px
+    }
+    .excel-toolbar{
+      display:flex;gap:8px;align-items:center;padding:9px;background:#f3f5f7;border-bottom:1px solid #ccd2da;
+      min-width:720px;
+    }
+    .formula-name{
+      width:60px;background:#fff;border:1px solid #cbd5e1;padding:7px;text-align:center;border-radius:4px;font-weight:700
+    }
+    .formula{
+      flex:1;background:#fff;border:1px solid #cbd5e1;padding:7px;border-radius:4px;color:#64748b
+    }
+    table.sheet{border-collapse:collapse;min-width:720px;width:100%}
+    .sheet th,.sheet td{
+      border:1px solid #cfd5dc;padding:9px 10px;text-align:left;min-width:95px;
+    }
+    .sheet thead th{background:#f2f3f5;text-align:center;color:#475569}
+    .rowhead{background:#f2f3f5!important;text-align:center!important;width:42px;min-width:42px!important;color:#64748b}
+    .cell{cursor:pointer;transition:.15s}
+    .cell:hover{background:#eef8f2}
+    .cell.selected{outline:3px solid var(--green);outline-offset:-3px;background:#edf8f1}
+    .quiz-option{
+      display:flex;gap:10px;align-items:flex-start;margin:8px 0;
+      padding:10px;border:1px solid var(--border);border-radius:10px;
+    }
+    .quiz-option input{width:auto;margin-top:4px}
+    .hidden{display:none}
+    .mini-nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+    .mini-nav a{
+      color:var(--green);font-weight:700;text-decoration:none;
+      background:#fff;border:1px solid #cfe2d7;padding:8px 11px;border-radius:10px
+    }
+    code{background:#eef2f7;padding:2px 6px;border-radius:5px}
+    .result{
+      text-align:center;padding:22px;border-radius:14px;background:#f8fafc;border:1px dashed #94a3b8
+    }
+    .big{font-size:36px;font-weight:800;color:var(--green)}
+    @media(max-width:640px){
+      section{padding:17px}
+      header{padding-top:28px}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <span class="badge" style="background:#fff;color:#185c37">TECHNIK LOGISTYK • EXCEL • LEKCJA 1</span>
+    <h1>Excel od podstaw — magazyn pod kontrolą</h1>
+    <p class="lead">Interaktywny poradnik na pierwsze zajęcia. Poznasz budowę arkusza, komórki, wiersze, kolumny, typy danych i wykonasz pierwsze praktyczne zadania logistyczne.</p>
+    <nav class="mini-nav">
+      <a href="#start">Start</a>
+      <a href="#budowa">Budowa Excela</a>
+      <a href="#symulator">Symulator</a>
+      <a href="#zadania">Zadania</a>
+      <a href="#quiz">Quiz</a>
+    </nav>
+  </div>
+</header>
+
+<div class="topbar">
+  <div class="wrap">
+    <strong>Postęp lekcji</strong>
+    <div class="progress-shell"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="score"><span id="score">0</span>/8 wykonanych</div>
+  </div>
+</div>
+
+<main class="wrap">
+  <section id="start">
+    <h2>1. Po co logistykowi Excel?</h2>
+    <div class="grid">
+      <div class="card"><strong>📦 Stany magazynowe</strong>Kontrola liczby produktów, braków i zapasów minimalnych.</div>
+      <div class="card"><strong>🚚 Transport</strong>Trasy, koszty, terminy dostaw i rejestry przewozów.</div>
+      <div class="card"><strong>🧾 Zamówienia</strong>Listy dostawców, ceny, ilości, wartości zamówień.</div>
+      <div class="card"><strong>📊 Analiza danych</strong>Filtrowanie, sortowanie, wykresy i raporty.</div>
+    </div>
+    <div class="callout" style="margin-top:16px">
+      <strong>Cel dzisiejszej lekcji:</strong> nie uczymy się jeszcze skomplikowanych funkcji. Najpierw musisz swobodnie poruszać się po arkuszu i rozumieć, gdzie Excel przechowuje dane.
+    </div>
+  </section>
+
+  <section id="budowa">
+    <h2>2. Jak zbudowany jest arkusz?</h2>
+    <p>Excel działa jak ogromna tabela. Każde pole to <strong>komórka</strong>. Kolumny oznaczane są literami, a wiersze liczbami.</p>
+    <div class="grid">
+      <div class="card"><span class="badge">KOLUMNA</span><h3>A, B, C, D...</h3><p>Pionowy zestaw komórek. Np. kolumna C może przechowywać ilość towaru.</p></div>
+      <div class="card"><span class="badge">WIERSZ</span><h3>1, 2, 3, 4...</h3><p>Poziomy zestaw komórek. Jeden wiersz może opisywać jeden produkt.</p></div>
+      <div class="card"><span class="badge">KOMÓRKA</span><h3>np. C4</h3><p>Przecięcie kolumny C z wierszem 4. Każda komórka ma własny adres.</p></div>
+      <div class="card"><span class="badge">ARKUSZ</span><h3>Arkusz1</h3><p>Jedna karta skoroszytu. Plik Excela może mieć wiele arkuszy.</p></div>
+    </div>
+  </section>
+
+  <section id="symulator">
+    <h2>3. Interaktywny mini-Excel</h2>
+    <p>Klikaj komórki. Spróbuj samodzielnie wskazać adresy danych.</p>
+    <div class="excel">
+      <div class="excel-toolbar">
+        <div class="formula-name" id="cellName">A1</div>
+        <div class="formula" id="cellValue">Kliknij komórkę, aby zobaczyć jej zawartość</div>
+      </div>
+      <table class="sheet" id="sheet">
+        <thead>
+          <tr><th class="rowhead"></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th></tr>
+        </thead>
+        <tbody>
+          <tr><th class="rowhead">1</th><td class="cell">Kod</td><td class="cell">Produkt</td><td class="cell">Ilość</td><td class="cell">Cena</td><td class="cell">Regał</td></tr>
+          <tr><th class="rowhead">2</th><td class="cell">LOG001</td><td class="cell">Paleta EUR</td><td class="cell">25</td><td class="cell">65,00 zł</td><td class="cell">A-01</td></tr>
+          <tr><th class="rowhead">3</th><td class="cell">LOG002</td><td class="cell">Folia stretch</td><td class="cell">80</td><td class="cell">31,50 zł</td><td class="cell">A-03</td></tr>
+          <tr><th class="rowhead">4</th><td class="cell">LOG003</td><td class="cell">Karton XL</td><td class="cell">120</td><td class="cell">4,90 zł</td><td class="cell">B-02</td></tr>
+          <tr><th class="rowhead">5</th><td class="cell">LOG004</td><td class="cell">Taśma pakowa</td><td class="cell">42</td><td class="cell">7,20 zł</td><td class="cell">B-04</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="task" id="task1">
+      <h3>Zadanie 1 — znajdź komórkę</h3>
+      <p>W jakiej komórce znajduje się liczba <strong>120</strong>?</p>
+      <input id="answer1" placeholder="Np. B4">
+      <button type="button" onclick="checkText('answer1','C4','fb1','task1',0)">Sprawdź</button>
+      <div class="feedback" id="fb1"></div>
+    </div>
+
+    <div class="task" id="task2">
+      <h3>Zadanie 2 — znajdź adres</h3>
+      <p>Jaki adres ma komórka zawierająca tekst <strong>Folia stretch</strong>?</p>
+      <input id="answer2" placeholder="Wpisz adres komórki">
+      <button type="button" onclick="checkText('answer2','B3','fb2','task2',1)">Sprawdź</button>
+      <div class="feedback" id="fb2"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>4. Typy danych w Excelu</h2>
+    <p>W komórkach możemy przechowywać różne rodzaje informacji. Excel inaczej traktuje tekst, liczby i daty.</p>
+    <div class="grid">
+      <div class="card"><strong>Tekst</strong><p>np. „Paleta EUR”, „Magazyn A”, „LOG001”</p></div>
+      <div class="card"><strong>Liczba</strong><p>np. 25, 120, 4,90</p></div>
+      <div class="card"><strong>Data</strong><p>np. 22.10.2026</p></div>
+      <div class="card"><strong>Formuła</strong><p>Zaczyna się znakiem <code>=</code>, np. <code>=C2*D2</code>.</p></div>
+    </div>
+
+    <div class="task" id="task3">
+      <h3>Zadanie 3 — rozpoznaj dane</h3>
+      <label for="typeSelect">Jakim typem danych jest wartość „LOG005”?</label>
+      <select id="typeSelect">
+        <option value="">-- wybierz --</option>
+        <option value="liczba">Liczba</option>
+        <option value="tekst">Tekst</option>
+        <option value="data">Data</option>
+        <option value="formula">Formuła</option>
+      </select>
+      <button type="button" onclick="checkSelect('typeSelect','tekst','fb3','task3',2)">Sprawdź</button>
+      <div class="feedback" id="fb3"></div>
+    </div>
+  </section>
+
+  <section id="zadania">
+    <h2>5. Zadania praktyczne</h2>
+    <p>Wykonaj te ćwiczenia już w prawdziwym Excelu lub LibreOffice Calc.</p>
+
+    <div class="task" id="task4">
+      <h3>Zadanie 4 — utwórz tabelę magazynową</h3>
+      <p>Utwórz arkusz z kolumnami: <strong>Kod, Produkt, Kategoria, Ilość, Cena netto, Lokalizacja</strong>. Wprowadź minimum 5 produktów.</p>
+      <label><input type="checkbox" id="done4" style="width:auto"> Wykonałem tabelę</label>
+      <button type="button" onclick="markManual('done4','fb4','task4',3)">Zatwierdź wykonanie</button>
+      <div class="feedback" id="fb4"></div>
+    </div>
+
+    <div class="task" id="task5">
+      <h3>Zadanie 5 — formatowanie</h3>
+      <p>Sformatuj nagłówki pogrubieniem, dodaj obramowania, dopasuj szerokość kolumn i ustaw ceny jako walutę.</p>
+      <label><input type="checkbox" id="done5" style="width:auto"> Gotowe</label>
+      <button type="button" onclick="markManual('done5','fb5','task5',4)">Zatwierdź wykonanie</button>
+      <div class="feedback" id="fb5"></div>
+    </div>
+
+    <div class="task" id="task6">
+      <h3>Zadanie 6 — pierwsza formuła</h3>
+      <p>Jeśli w <strong>C2</strong> jest ilość 25, a w <strong>D2</strong> cena 65 zł, jak powinna wyglądać formuła licząca wartość zapasu?</p>
+      <input id="answer6" placeholder="Wpisz formułę">
+      <button type="button" onclick="checkFormula()">Sprawdź</button>
+      <div class="feedback" id="fb6"></div>
+    </div>
+  </section>
+
+  <section id="quiz">
+    <h2>6. Miniquiz podsumowujący</h2>
+
+    <div class="task" id="task7">
+      <h3>Pytanie 1</h3>
+      <p>Co oznacza adres <strong>D7</strong>?</p>
+      <label class="quiz-option"><input type="radio" name="q1" value="a"> Wiersz D, kolumna 7</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="b"> Kolumna D, wiersz 7</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="c"> Arkusz D, komórka 7</label>
+      <button type="button" onclick="checkRadio('q1','b','fb7','task7',6)">Sprawdź</button>
+      <div class="feedback" id="fb7"></div>
+    </div>
+
+    <div class="task" id="task8">
+      <h3>Pytanie 2</h3>
+      <p>Jakim znakiem rozpoczyna się formuła w Excelu?</p>
+      <label class="quiz-option"><input type="radio" name="q2" value="+"> +</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="="> =</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="#"> #</label>
+      <button type="button" onclick="checkRadio('q2','=','fb8','task8',7)">Sprawdź</button>
+      <div class="feedback" id="fb8"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>7. Podsumowanie lekcji</h2>
+    <div class="result">
+      <div class="big"><span id="finalScore">0</span>/8</div>
+      <p id="finalText">Wykonuj zadania, aby zobaczyć swój wynik.</p>
+      <button type="button" class="secondary" onclick="resetLesson()">Zresetuj postęp</button>
+    </div>
+    <div class="callout" style="margin-top:18px">
+      <strong>Po tej lekcji uczeń powinien umieć:</strong> rozpoznać wiersz, kolumnę i komórkę, wskazać adres komórki, rozróżniać podstawowe typy danych, utworzyć prostą tabelę magazynową i wpisać pierwszą formułę.
+    </div>
+  </section>
+</main>
+
+<script>
+  const completed = Array(8).fill(false);
+
+  function updateProgress(){
+    const score = completed.filter(Boolean).length;
+    document.getElementById('score').textContent = score;
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('progressBar').style.width = (score/8*100) + '%';
+
+    const t = document.getElementById('finalText');
+    if(score === 8) t.textContent = 'Świetnie! Lekcja ukończona w 100%.';
+    else if(score >= 6) t.textContent = 'Bardzo dobrze — większość materiału opanowana.';
+    else if(score >= 3) t.textContent = 'Dobry początek. Zostało jeszcze kilka zadań.';
+    else t.textContent = 'Wykonuj zadania, aby zobaczyć swój wynik.';
+  }
+
+  function complete(index, taskId){
+    completed[index] = true;
+    document.getElementById(taskId).classList.add('done');
+    updateProgress();
+  }
+
+  function checkText(inputId, correct, feedbackId, taskId, index){
+    const value = document.getElementById(inputId).value.trim().toUpperCase();
+    const fb = document.getElementById(feedbackId);
+    if(value === correct){
+      fb.textContent = '✓ Poprawnie!';
+      fb.className = 'feedback ok';
+      complete(index, taskId);
+    } else {
+      fb.textContent = '✗ Jeszcze nie. Sprawdź literę kolumny i numer wiersza.';
+      fb.className = 'feedback bad';
+    }
+  }
+
+  function checkSelect(selectId, correct, feedbackId, taskId, index){
+    const value = document.getElementById(selectId).value;
+    const fb = document.getElementById(feedbackId);
+    if(value === correct){
+      fb.textContent = '✓ Poprawnie! Kod produktu jest tekstem.';
+      fb.className = 'feedback ok';
+      complete(index, taskId);
+    } else {
+      fb.textContent = '✗ Spróbuj ponownie.';
+      fb.className = 'feedback bad';
+    }
+  }
+
+  function markManual(checkId, feedbackId, taskId, index){
+    const checked = document.getElementById(checkId).checked;
+    const fb = document.getElementById(feedbackId);
+    if(checked){
+      fb.textContent = '✓ Zadanie oznaczone jako wykonane.';
+      fb.className = 'feedback ok';
+      complete(index, taskId);
+    } else {
+      fb.textContent = 'Najpierw wykonaj zadanie i zaznacz pole.';
+      fb.className = 'feedback bad';
+    }
+  }
+
+  function checkFormula(){
+    let value = document.getElementById('answer6').value.trim().replace(/\s/g,'').toUpperCase();
+    const fb = document.getElementById('fb6');
+    if(value === '=C2*D2' || value === '=D2*C2'){
+      fb.textContent = '✓ Poprawnie! Mnożymy ilość przez cenę.';
+      fb.className = 'feedback ok';
+      complete(5,'task6');
+    } else {
+      fb.textContent = '✗ Podpowiedź: formuła zaczyna się od = i korzysta z komórek C2 oraz D2.';
+      fb.className = 'feedback bad';
+    }
+  }
+
+  function checkRadio(name, correct, feedbackId, taskId, index){
+    const checked = document.querySelector('input[name="'+name+'"]:checked');
+    const fb = document.getElementById(feedbackId);
+    if(!checked){
+      fb.textContent = 'Wybierz odpowiedź.';
+      fb.className = 'feedback bad';
+      return;
+    }
+    if(checked.value === correct){
+      fb.textContent = '✓ Poprawna odpowiedź!';
+      fb.className = 'feedback ok';
+      complete(index, taskId);
+    } else {
+      fb.textContent = '✗ Niepoprawnie. Spróbuj ponownie.';
+      fb.className = 'feedback bad';
+    }
+  }
+
+  function resetLesson(){
+    for(let i=0;i<completed.length;i++) completed[i]=false;
+    document.querySelectorAll('.task').forEach(x=>x.classList.remove('done'));
+    document.querySelectorAll('.feedback').forEach(x=>{x.textContent='';x.className='feedback';});
+    document.querySelectorAll('input[type="text"], input:not([type]), select').forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});
+    document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(el=>el.checked=false);
+    updateProgress();
+  }
+
+  const cells = document.querySelectorAll('#sheet .cell');
+  cells.forEach((cell)=>{
+    cell.addEventListener('click',()=>{
+      cells.forEach(c=>c.classList.remove('selected'));
+      cell.classList.add('selected');
+      const row = cell.parentElement.rowIndex;
+      const colIndex = cell.cellIndex;
+      const col = String.fromCharCode(64 + colIndex);
+      document.getElementById('cellName').textContent = col + row;
+      document.getElementById('cellValue').textContent = cell.textContent;
+    });
+  });
+
+  updateProgress();
+</script>
+</body>
+</html>
