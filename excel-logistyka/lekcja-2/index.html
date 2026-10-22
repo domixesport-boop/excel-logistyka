@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Excel w logistyce — Lekcja 2</title>
+  <style>
+    :root{--bg:#f5f7fb;--panel:#fff;--text:#1f2937;--muted:#667085;--border:#dfe3ea;--green:#217346;--green2:#e9f5ee;--blue:#2563eb;--blue2:#eff6ff;--red:#dc2626;--ok:#15803d;--shadow:0 10px 28px rgba(16,24,40,.08)}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.55}
+    header{background:linear-gradient(135deg,#185c37,#217346);color:#fff;padding:36px 20px 30px}
+    .wrap{max-width:1100px;margin:auto;padding:0 20px} h1{margin:0 0 10px;font-size:clamp(28px,5vw,44px)} h2{margin-top:0}
+    .lead{max-width:850px;font-size:18px;opacity:.96}.badge{display:inline-block;padding:5px 9px;border-radius:999px;background:var(--green2);color:var(--green);font-weight:700;font-size:13px}
+    .topbar{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--border)} .topbar .wrap{display:flex;gap:12px;align-items:center;justify-content:space-between;padding-top:10px;padding-bottom:10px;flex-wrap:wrap}
+    .progress-shell{height:12px;background:#e5e7eb;border-radius:999px;overflow:hidden;flex:1;min-width:220px}.progress-bar{height:100%;width:0;background:var(--green);transition:.3s}.score{font-weight:700;color:var(--green)}
+    main{padding:26px 0 60px} section{background:var(--panel);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:24px;margin:20px 0}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}.card{border:1px solid var(--border);border-radius:14px;padding:16px;background:#fff}
+    .callout{border-left:5px solid var(--green);background:var(--green2);padding:14px 16px;border-radius:10px}.task{border:1px solid var(--border);border-radius:14px;padding:18px;margin:16px 0;background:#fbfcfe}.task.done{border-color:#8bd3a7;background:#f0fbf4}
+    button{border:0;border-radius:10px;padding:11px 15px;font-weight:700;cursor:pointer;font-size:15px;background:var(--green);color:#fff}button.secondary{background:#eef2f7;color:#27364a}button.blue{background:var(--blue)}button:hover{filter:brightness(.97)}
+    input,select{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:9px;font-size:16px;background:#fff}label{font-weight:600;display:block;margin:8px 0 5px}
+    .feedback{min-height:26px;margin-top:8px;font-weight:700}.ok{color:var(--ok)}.bad{color:var(--red)}code{background:#eef2f7;padding:2px 6px;border-radius:5px;font-family:Consolas,monospace}
+    .formula-box{background:#f8fafc;border:1px dashed #94a3b8;border-radius:12px;padding:14px;font-family:Consolas,monospace;font-size:17px;margin-top:10px}
+    .excel{border:1px solid #aab2bd;border-radius:10px;overflow:auto;background:#fff;margin-top:15px}.excel-toolbar{display:flex;gap:8px;align-items:center;padding:9px;background:#f3f5f7;border-bottom:1px solid #ccd2da;min-width:780px}
+    .formula-name{width:70px;background:#fff;border:1px solid #cbd5e1;padding:7px;text-align:center;border-radius:4px;font-weight:700}.formula{flex:1;background:#fff;border:1px solid #cbd5e1;padding:7px;border-radius:4px;color:#475569;min-height:38px}
+    table.sheet{border-collapse:collapse;min-width:780px;width:100%}.sheet th,.sheet td{border:1px solid #cfd5dc;padding:9px 10px;text-align:left;min-width:95px}.sheet thead th{background:#f2f3f5;text-align:center;color:#475569}
+    .rowhead{background:#f2f3f5!important;text-align:center!important;width:42px;min-width:42px!important;color:#64748b}.cell{cursor:pointer;transition:.15s}.cell:hover{background:#eef8f2}.cell.selected{outline:3px solid var(--green);outline-offset:-3px;background:#edf8f1}
+    .mini-nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.mini-nav a{color:var(--green);font-weight:700;text-decoration:none;background:#fff;border:1px solid #cfe2d7;padding:8px 11px;border-radius:10px}
+    .quiz-option{display:flex;gap:10px;align-items:flex-start;margin:8px 0;padding:10px;border:1px solid var(--border);border-radius:10px}.quiz-option input{width:auto;margin-top:4px}
+    .calc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;align-items:end}.resultbox{padding:15px;border-radius:12px;background:var(--blue2);border:1px solid #bfdbfe;min-height:58px;font-weight:700}
+    .result{text-align:center;padding:22px;border-radius:14px;background:#f8fafc;border:1px dashed #94a3b8}.big{font-size:36px;font-weight:800;color:var(--green)}.op{font-size:28px;font-weight:800;color:var(--green)}
+    @media(max-width:640px){section{padding:17px}header{padding-top:28px}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <span class="badge" style="background:#fff;color:#185c37">TECHNIK LOGISTYK • EXCEL • LEKCJA 2</span>
+    <h1>Formuły i podstawowe obliczenia</h1>
+    <p class="lead">Dzisiaj Excel zacznie liczyć za Ciebie. Nauczysz się tworzyć formuły, używać operatorów matematycznych oraz funkcji SUMA, ŚREDNIA, MIN i MAX.</p>
+    <nav class="mini-nav">
+      <a href="#start">Start</a><a href="#operatory">Operatory</a><a href="#symulator">Mini-Excel</a><a href="#funkcje">Funkcje</a><a href="#zadania">Zadania</a><a href="#quiz">Quiz</a>
+    </nav>
+  </div>
+</header>
+
+<div class="topbar">
+  <div class="wrap">
+    <strong>Postęp lekcji</strong>
+    <div class="progress-shell"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="score"><span id="score">0</span>/10 wykonanych</div>
+  </div>
+</div>
+
+<main class="wrap">
+  <section id="start">
+    <h2>1. Po co logistykowi formuły?</h2>
+    <div class="grid">
+      <div class="card"><strong>📦 Wartość magazynu</strong><p>Excel policzy wartość zapasu: ilość × cena jednostkowa.</p></div>
+      <div class="card"><strong>🚚 Koszty transportu</strong><p>Możesz sumować paliwo, opłaty drogowe i inne koszty.</p></div>
+      <div class="card"><strong>📊 Statystyki</strong><p>Excel szybko znajdzie średnią, najmniejszą i największą wartość.</p></div>
+      <div class="card"><strong>⚡ Automatyzacja</strong><p>Zmiana danych powoduje automatyczne przeliczenie wyników.</p></div>
+    </div>
+    <div class="callout" style="margin-top:16px"><strong>Najważniejsza zasada:</strong> każda formuła w Excelu zaczyna się znakiem <code>=</code>.</div>
+  </section>
+
+  <section id="operatory">
+    <h2>2. Podstawowe operatory</h2>
+    <div class="grid">
+      <div class="card"><div class="op">+</div><strong>Dodawanie</strong><p><code>=A1+B1</code></p></div>
+      <div class="card"><div class="op">-</div><strong>Odejmowanie</strong><p><code>=A1-B1</code></p></div>
+      <div class="card"><div class="op">*</div><strong>Mnożenie</strong><p><code>=A1*B1</code></p></div>
+      <div class="card"><div class="op">/</div><strong>Dzielenie</strong><p><code>=A1/B1</code></p></div>
+    </div>
+
+    <h3 style="margin-top:24px">Interaktywny kalkulator logistyczny</h3>
+    <p>Sprawdź, jak wygląda obliczenie wartości towaru.</p>
+    <div class="calc-grid">
+      <div><label for="calcQty">Ilość sztuk</label><input id="calcQty" type="number" min="0" value="25"></div>
+      <div><label for="calcPrice">Cena za sztukę [zł]</label><input id="calcPrice" type="number" min="0" step="0.01" value="65"></div>
+      <div><button type="button" class="blue" id="calcBtn">Policz wartość</button></div>
+      <div class="resultbox" id="calcResult">25 × 65,00 zł = 1625,00 zł</div>
+    </div>
+    <div class="formula-box">Jeżeli ilość jest w C2, a cena w D2: <strong>=C2*D2</strong></div>
+  </section>
+
+  <section id="symulator">
+    <h2>3. Mini-Excel — policz wartość zapasu</h2>
+    <p>Klikaj komórki, aby zobaczyć ich adres i zawartość.</p>
+    <div class="excel">
+      <div class="excel-toolbar">
+        <div class="formula-name" id="cellName">A1</div>
+        <div class="formula" id="cellValue">Kliknij komórkę</div>
+      </div>
+      <table class="sheet" id="sheet">
+        <thead><tr><th class="rowhead"></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th></tr></thead>
+        <tbody>
+          <tr><th class="rowhead">1</th><td class="cell">Kod</td><td class="cell">Produkt</td><td class="cell">Ilość</td><td class="cell">Cena</td><td class="cell">Wartość</td></tr>
+          <tr><th class="rowhead">2</th><td class="cell">LOG001</td><td class="cell">Paleta EUR</td><td class="cell">25</td><td class="cell">65</td><td class="cell">1625</td></tr>
+          <tr><th class="rowhead">3</th><td class="cell">LOG002</td><td class="cell">Folia stretch</td><td class="cell">80</td><td class="cell">31,50</td><td class="cell">2520</td></tr>
+          <tr><th class="rowhead">4</th><td class="cell">LOG003</td><td class="cell">Karton XL</td><td class="cell">120</td><td class="cell">4,90</td><td class="cell">588</td></tr>
+          <tr><th class="rowhead">5</th><td class="cell">LOG004</td><td class="cell">Taśma pakowa</td><td class="cell">42</td><td class="cell">7,20</td><td class="cell">302,40</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="task" id="task1">
+      <h3>Zadanie 1 — pierwsza formuła</h3>
+      <p>Jaką formułę wpiszesz w komórce <strong>E2</strong>, aby policzyć wartość towaru?</p>
+      <input id="answer1" placeholder="Np. =A1+B1">
+      <button type="button" onclick="checkFormula('answer1',['=C2*D2','=D2*C2'],'fb1','task1',0)">Sprawdź</button>
+      <div class="feedback" id="fb1"></div>
+    </div>
+
+    <div class="task" id="task2">
+      <h3>Zadanie 2 — odejmowanie</h3>
+      <p>Magazyn miał 120 kartonów. Wysłano 35. Jak zapisać formułę, jeśli stan początkowy jest w <strong>C4</strong>, a wydanie w <strong>F4</strong>?</p>
+      <input id="answer2" placeholder="Wpisz formułę">
+      <button type="button" onclick="checkFormula('answer2',['=C4-F4'],'fb2','task2',1)">Sprawdź</button>
+      <div class="feedback" id="fb2"></div>
+    </div>
+  </section>
+
+  <section id="funkcje">
+    <h2>4. Najważniejsze funkcje na start</h2>
+    <div class="grid">
+      <div class="card"><span class="badge">SUMA</span><h3>Dodaje wiele wartości</h3><div class="formula-box">=SUMA(E2:E5)</div></div>
+      <div class="card"><span class="badge">ŚREDNIA</span><h3>Liczy średnią</h3><div class="formula-box">=ŚREDNIA(D2:D5)</div></div>
+      <div class="card"><span class="badge">MIN</span><h3>Najmniejsza wartość</h3><div class="formula-box">=MIN(C2:C5)</div></div>
+      <div class="card"><span class="badge">MAX</span><h3>Największa wartość</h3><div class="formula-box">=MAX(C2:C5)</div></div>
+    </div>
+    <div class="callout" style="margin-top:18px">Zakres <code>C2:C5</code> oznacza wszystkie komórki od C2 do C5.</div>
+
+    <div class="task" id="task3">
+      <h3>Zadanie 3 — SUMA</h3>
+      <p>Jaką formułą policzysz łączną wartość wszystkich produktów z komórek <strong>E2:E5</strong>?</p>
+      <input id="answer3" placeholder="Wpisz formułę">
+      <button type="button" onclick="checkFormula('answer3',['=SUMA(E2:E5)'],'fb3','task3',2)">Sprawdź</button>
+      <div class="feedback" id="fb3"></div>
+    </div>
+
+    <div class="task" id="task4">
+      <h3>Zadanie 4 — ŚREDNIA</h3>
+      <p>Jaką formułą policzysz średnią cenę produktów z zakresu <strong>D2:D5</strong>?</p>
+      <input id="answer4" placeholder="Wpisz formułę">
+      <button type="button" onclick="checkFormula('answer4',['=ŚREDNIA(D2:D5)','=SREDNIA(D2:D5)'],'fb4','task4',3)">Sprawdź</button>
+      <div class="feedback" id="fb4"></div>
+    </div>
+
+    <div class="task" id="task5">
+      <h3>Zadanie 5 — MAX</h3>
+      <p>Podaj formułę znajdującą <strong>największy stan magazynowy</strong> w zakresie C2:C5.</p>
+      <input id="answer5" placeholder="Wpisz formułę">
+      <button type="button" onclick="checkFormula('answer5',['=MAX(C2:C5)'],'fb5','task5',4)">Sprawdź</button>
+      <div class="feedback" id="fb5"></div>
+    </div>
+  </section>
+
+  <section id="zadania">
+    <h2>5. Zadania praktyczne w prawdziwym Excelu</h2>
+
+    <div class="task" id="task6">
+      <h3>Zadanie 6 — wartość magazynu</h3>
+      <p>Otwórz arkusz z poprzedniej lekcji. Dodaj kolumnę <strong>Wartość</strong> i policz wartość każdego produktu jako <strong>Ilość × Cena netto</strong>.</p>
+      <label><input type="checkbox" id="done6" style="width:auto"> Wykonałem zadanie</label>
+      <button type="button" onclick="markManual('done6','fb6','task6',5)">Zatwierdź</button>
+      <div class="feedback" id="fb6"></div>
+    </div>
+
+    <div class="task" id="task7">
+      <h3>Zadanie 7 — podsumowanie magazynu</h3>
+      <p>Pod tabelą oblicz: <strong>łączną wartość magazynu, średnią cenę produktu, najmniejszy i największy stan magazynowy</strong>.</p>
+      <label><input type="checkbox" id="done7" style="width:auto"> Wszystkie cztery obliczenia są gotowe</label>
+      <button type="button" onclick="markManual('done7','fb7','task7',6)">Zatwierdź</button>
+      <div class="feedback" id="fb7"></div>
+    </div>
+
+    <div class="task" id="task8">
+      <h3>Zadanie 8 — policz samodzielnie</h3>
+      <p>Masz 48 paczek po 12,50 zł każda. Jaka jest łączna wartość?</p>
+      <input id="answer8" type="number" step="0.01" placeholder="Wpisz wynik">
+      <button type="button" onclick="checkNumber('answer8',600,'fb8','task8',7)">Sprawdź</button>
+      <div class="feedback" id="fb8"></div>
+    </div>
+  </section>
+
+  <section id="quiz">
+    <h2>6. Quiz podsumowujący</h2>
+
+    <div class="task" id="task9">
+      <h3>Pytanie 1</h3>
+      <p>Która formuła poprawnie sumuje komórki od A1 do A10?</p>
+      <label class="quiz-option"><input type="radio" name="q1" value="a"> =A1+A10</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="b"> =SUMA(A1:A10)</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="c"> SUMA=A1:A10</label>
+      <button type="button" onclick="checkRadio('q1','b','fb9','task9',8)">Sprawdź</button>
+      <div class="feedback" id="fb9"></div>
+    </div>
+
+    <div class="task" id="task10">
+      <h3>Pytanie 2</h3>
+      <p>Co zrobi formuła <code>=MAX(C2:C20)</code>?</p>
+      <label class="quiz-option"><input type="radio" name="q2" value="a"> Zsumuje wszystkie wartości</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="b"> Znajdzie najmniejszą wartość</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="c"> Znajdzie największą wartość</label>
+      <button type="button" onclick="checkRadio('q2','c','fb10','task10',9)">Sprawdź</button>
+      <div class="feedback" id="fb10"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>7. Podsumowanie lekcji</h2>
+    <div class="result">
+      <div class="big"><span id="finalScore">0</span>/10</div>
+      <p id="finalText">Wykonuj zadania, aby zobaczyć postęp.</p>
+      <button type="button" class="secondary" onclick="resetLesson()">Zresetuj postęp</button>
+    </div>
+    <div class="callout" style="margin-top:18px"><strong>Po tej lekcji uczeń powinien umieć:</strong> tworzyć proste formuły, korzystać z +, -, *, / oraz używać funkcji SUMA, ŚREDNIA, MIN i MAX w arkuszu logistycznym.</div>
+  </section>
+</main>
+
+<script>
+const completed=Array(10).fill(false);
+function normalizeFormula(v){return v.trim().replace(/\s/g,'').toUpperCase()}
+function updateProgress(){
+  const score=completed.filter(Boolean).length;
+  document.getElementById('score').textContent=score;
+  document.getElementById('finalScore').textContent=score;
+  document.getElementById('progressBar').style.width=(score/10*100)+'%';
+  const t=document.getElementById('finalText');
+  if(score===10)t.textContent='Świetnie! Lekcja ukończona w 100%.';
+  else if(score>=8)t.textContent='Bardzo dobrze — materiał jest praktycznie opanowany.';
+  else if(score>=5)t.textContent='Dobry wynik. Zostało jeszcze kilka ćwiczeń.';
+  else t.textContent='Wykonuj zadania, aby zobaczyć postęp.';
+}
+function complete(index,taskId){completed[index]=true;document.getElementById(taskId).classList.add('done');updateProgress()}
+function checkFormula(inputId,accepted,feedbackId,taskId,index){
+  const value=normalizeFormula(document.getElementById(inputId).value);
+  const answers=accepted.map(normalizeFormula);
+  const fb=document.getElementById(feedbackId);
+  if(answers.includes(value)){fb.textContent='✓ Poprawnie!';fb.className='feedback ok';complete(index,taskId)}
+  else{fb.textContent='✗ Niepoprawnie. Pamiętaj o znaku = i adresach komórek.';fb.className='feedback bad'}
+}
+function checkNumber(inputId,correct,feedbackId,taskId,index){
+  const value=Number(document.getElementById(inputId).value);const fb=document.getElementById(feedbackId);
+  if(Math.abs(value-correct)<0.001){fb.textContent='✓ Poprawnie! 48 × 12,50 zł = 600 zł.';fb.className='feedback ok';complete(index,taskId)}
+  else{fb.textContent='✗ Spróbuj ponownie. Pomnóż liczbę paczek przez cenę jednej paczki.';fb.className='feedback bad'}
+}
+function markManual(checkId,feedbackId,taskId,index){
+  const checked=document.getElementById(checkId).checked;const fb=document.getElementById(feedbackId);
+  if(checked){fb.textContent='✓ Zadanie oznaczone jako wykonane.';fb.className='feedback ok';complete(index,taskId)}
+  else{fb.textContent='Najpierw wykonaj zadanie i zaznacz pole.';fb.className='feedback bad'}
+}
+function checkRadio(name,correct,feedbackId,taskId,index){
+  const checked=document.querySelector('input[name="'+name+'"]:checked');const fb=document.getElementById(feedbackId);
+  if(!checked){fb.textContent='Wybierz odpowiedź.';fb.className='feedback bad';return}
+  if(checked.value===correct){fb.textContent='✓ Poprawna odpowiedź!';fb.className='feedback ok';complete(index,taskId)}
+  else{fb.textContent='✗ Niepoprawnie. Spróbuj ponownie.';fb.className='feedback bad'}
+}
+function resetLesson(){
+  for(let i=0;i<completed.length;i++)completed[i]=false;
+  document.querySelectorAll('.task').forEach(x=>x.classList.remove('done'));
+  document.querySelectorAll('.feedback').forEach(x=>{x.textContent='';x.className='feedback'});
+  document.querySelectorAll('input').forEach(el=>{if(el.id!=='calcQty'&&el.id!=='calcPrice'){if(el.type==='checkbox'||el.type==='radio')el.checked=false;else el.value=''}});
+  updateProgress();
+}
+document.getElementById('calcBtn').addEventListener('click',()=>{
+  const qty=Math.max(0,Number(document.getElementById('calcQty').value)||0);
+  const price=Math.max(0,Number(document.getElementById('calcPrice').value)||0);
+  const result=qty*price;
+  document.getElementById('calcResult').textContent=qty+' × '+price.toFixed(2).replace('.',',')+' zł = '+result.toFixed(2).replace('.',',')+' zł';
+});
+const cells=document.querySelectorAll('#sheet .cell');
+cells.forEach(cell=>cell.addEventListener('click',()=>{
+  cells.forEach(c=>c.classList.remove('selected'));cell.classList.add('selected');
+  const row=cell.parentElement.rowIndex;const colIndex=cell.cellIndex;const col=String.fromCharCode(64+colIndex);
+  document.getElementById('cellName').textContent=col+row;document.getElementById('cellValue').textContent=cell.textContent;
+}));
+updateProgress();
+</script>
+</body>
+</html>
