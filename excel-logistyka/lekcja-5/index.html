@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Excel w logistyce — Lekcja 5</title>
+  <style>
+    :root{
+      --bg:#f5f7fb;--panel:#ffffff;--text:#1f2937;--muted:#667085;--border:#dfe3ea;
+      --green:#217346;--green2:#e9f5ee;--blue:#2563eb;--blue2:#eff6ff;
+      --amber:#b45309;--amber2:#fff7ed;--red:#dc2626;--red2:#fef2f2;
+      --ok:#15803d;--shadow:0 10px 28px rgba(16,24,40,.08)
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.55}
+    header{background:linear-gradient(135deg,#185c37,#217346);color:#fff;padding:36px 20px 30px}
+    .wrap{max-width:1120px;margin:auto;padding:0 20px}
+    h1{margin:0 0 10px;font-size:clamp(28px,5vw,44px)}
+    h2{margin-top:0} h3{margin-bottom:8px}
+    .lead{max-width:900px;font-size:18px;opacity:.96}
+    .badge{display:inline-block;padding:5px 9px;border-radius:999px;background:var(--green2);color:var(--green);font-weight:700;font-size:13px}
+    .topbar{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--border)}
+    .topbar .wrap{display:flex;gap:12px;align-items:center;justify-content:space-between;padding-top:10px;padding-bottom:10px;flex-wrap:wrap}
+    .progress-shell{height:12px;background:#e5e7eb;border-radius:999px;overflow:hidden;flex:1;min-width:220px}
+    .progress-bar{height:100%;width:0;background:var(--green);transition:.3s}
+    .score{font-weight:700;color:var(--green)}
+    main{padding:26px 0 60px}
+    section{background:var(--panel);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:24px;margin:20px 0}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+    .card{border:1px solid var(--border);border-radius:14px;padding:16px;background:#fff}
+    .callout{border-left:5px solid var(--green);background:var(--green2);padding:14px 16px;border-radius:10px}
+    .warning{border-left:5px solid #f59e0b;background:var(--amber2);padding:14px 16px;border-radius:10px}
+    .task{border:1px solid var(--border);border-radius:14px;padding:18px;margin:16px 0;background:#fbfcfe}
+    .task.done{border-color:#8bd3a7;background:#f0fbf4}
+    button{border:0;border-radius:10px;padding:11px 15px;font-weight:700;cursor:pointer;font-size:15px;background:var(--green);color:#fff}
+    button.secondary{background:#eef2f7;color:#27364a}
+    button.blue{background:var(--blue)}
+    button:hover{filter:brightness(.97)}
+    input,select{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:9px;font-size:16px;background:#fff}
+    label{font-weight:600;display:block;margin:8px 0 5px}
+    .feedback{min-height:26px;margin-top:8px;font-weight:700}
+    .ok{color:var(--ok)} .bad{color:var(--red)}
+    code{background:#eef2f7;padding:2px 6px;border-radius:5px;font-family:Consolas,monospace}
+    .formula-box{background:#f8fafc;border:1px dashed #94a3b8;border-radius:12px;padding:14px;font-family:Consolas,monospace;font-size:17px;margin-top:10px}
+    .mini-nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+    .mini-nav a{color:var(--green);font-weight:700;text-decoration:none;background:#fff;border:1px solid #cfe2d7;padding:8px 11px;border-radius:10px}
+    .excel{border:1px solid #aab2bd;border-radius:10px;overflow:auto;background:#fff;margin-top:15px}
+    .excel-toolbar{display:flex;gap:8px;align-items:center;padding:9px;background:#f3f5f7;border-bottom:1px solid #ccd2da;min-width:900px;flex-wrap:wrap}
+    .toolbar-controls{display:flex;gap:8px;flex-wrap:wrap;width:100%}
+    .toolbar-controls select{width:auto;min-width:165px}
+    table.sheet{border-collapse:collapse;min-width:900px;width:100%}
+    .sheet th,.sheet td{border:1px solid #cfd5dc;padding:9px 10px;text-align:left;min-width:95px}
+    .sheet thead th{background:#f2f3f5;text-align:center;color:#475569}
+    .hl-low{background:#fef3c7!important;color:#92400e;font-weight:700}
+    .hl-zero{background:#fee2e2!important;color:#991b1b;font-weight:700}
+    .hl-high{background:#dcfce7!important;color:#166534;font-weight:700}
+    .quiz-option{display:flex;gap:10px;align-items:flex-start;margin:8px 0;padding:10px;border:1px solid var(--border);border-radius:10px}
+    .quiz-option input{width:auto;margin-top:4px}
+    .result{text-align:center;padding:22px;border-radius:14px;background:#f8fafc;border:1px dashed #94a3b8}
+    .big{font-size:36px;font-weight:800;color:var(--green)}
+    .stat{font-size:28px;font-weight:800;color:var(--green)}
+    .muted{color:var(--muted)}
+    .steps{counter-reset:step}
+    .step{position:relative;padding-left:48px;margin:18px 0;min-height:38px}
+    .step:before{counter-increment:step;content:counter(step);position:absolute;left:0;top:0;width:34px;height:34px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-weight:800}
+    @media(max-width:700px){section{padding:17px}header{padding-top:28px}.toolbar-controls select{width:100%}}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="badge" style="background:#fff;color:#185c37">TECHNIK LOGISTYK • EXCEL • LEKCJA 5</span>
+    <h1>Sortowanie, filtrowanie i formatowanie warunkowe</h1>
+    <p class="lead">Nauczysz się pracować z większą tabelą magazynową: porządkować dane, wyszukiwać potrzebne rekordy i automatycznie wyróżniać problemy.</p>
+    <nav class="mini-nav">
+      <a href="#start">Wprowadzenie</a>
+      <a href="#sortowanie">Sortowanie</a>
+      <a href="#filtrowanie">Filtrowanie</a>
+      <a href="#formatowanie">Formatowanie</a>
+      <a href="#symulator">Symulator</a>
+      <a href="#zadania">Zadania</a>
+      <a href="#quiz">Quiz</a>
+    </nav>
+  </div>
+</header>
+
+<div class="topbar">
+  <div class="wrap">
+    <strong>Postęp lekcji</strong>
+    <div class="progress-shell"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="score"><span id="score">0</span>/10 wykonanych</div>
+  </div>
+</div>
+
+<main class="wrap">
+
+<section id="start">
+  <h2>1. Po co logistykowi sortowanie i filtrowanie?</h2>
+  <div class="grid">
+    <div class="card"><strong>📦 Szybkie znalezienie braków</strong><p>Wyświetlasz tylko produkty z niskim stanem.</p></div>
+    <div class="card"><strong>💰 Analiza cen</strong><p>Sortujesz produkty od najdroższego do najtańszego.</p></div>
+    <div class="card"><strong>🏷️ Kategorie</strong><p>Pokazujesz tylko wybraną grupę produktów.</p></div>
+    <div class="card"><strong>⚠️ Ostrzeżenia</strong><p>Excel sam wyróżnia problemy kolorami.</p></div>
+  </div>
+  <div class="callout" style="margin-top:16px">Przy setkach rekordów nie przeglądamy tabeli ręcznie — wykorzystujemy narzędzia analizy danych.</div>
+</section>
+
+<section id="sortowanie">
+  <h2>2. Sortowanie danych</h2>
+  <p>Sortowanie zmienia kolejność wierszy według wybranej kolumny.</p>
+  <div class="grid">
+    <div class="card"><div class="stat">A → Z</div><strong>Tekst rosnąco</strong></div>
+    <div class="card"><div class="stat">Z → A</div><strong>Tekst malejąco</strong></div>
+    <div class="card"><div class="stat">1 → 9</div><strong>Liczby rosnąco</strong></div>
+    <div class="card"><div class="stat">9 → 1</div><strong>Liczby malejąco</strong></div>
+  </div>
+  <div class="warning" style="margin-top:16px"><strong>Ważne:</strong> sortuj całą tabelę. Posortowanie tylko jednej kolumny może pomieszać dane produktów.</div>
+
+  <div class="task" id="task1">
+    <h3>Zadanie 1</h3>
+    <p>Jak posortować kolumnę „Cena”, aby najdroższe produkty pojawiły się na górze?</p>
+    <label class="quiz-option"><input type="radio" name="q1" value="a"> Rosnąco</label>
+    <label class="quiz-option"><input type="radio" name="q1" value="b"> Malejąco</label>
+    <label class="quiz-option"><input type="radio" name="q1" value="c"> A-Z</label>
+    <label class="quiz-option"><input type="radio" name="q1" value="d"> Nie ma znaczenia</label>
+    <button type="button" onclick="checkRadio('q1','b','fb1','task1',0)">Sprawdź</button>
+    <div class="feedback" id="fb1"></div>
+  </div>
+</section>
+
+<section id="filtrowanie">
+  <h2>3. Filtrowanie danych</h2>
+  <p>Filtr nie usuwa danych — tymczasowo ukrywa rekordy niespełniające wybranych warunków.</p>
+  <div class="grid">
+    <div class="card"><strong>Filtr tekstowy</strong><p>np. tylko „Opakowania”.</p></div>
+    <div class="card"><strong>Filtr liczbowy</strong><p>np. stan mniejszy niż 10.</p></div>
+    <div class="card"><strong>Filtry łączone</strong><p>np. Opakowania + stan poniżej 10.</p></div>
+  </div>
+
+  <div class="task" id="task2">
+    <h3>Zadanie 2</h3>
+    <p>Co dzieje się z rekordami niespełniającymi filtra?</p>
+    <label class="quiz-option"><input type="radio" name="q2" value="a"> Są usuwane</label>
+    <label class="quiz-option"><input type="radio" name="q2" value="b"> Są tymczasowo ukrywane</label>
+    <label class="quiz-option"><input type="radio" name="q2" value="c"> Trafiają do nowego arkusza</label>
+    <label class="quiz-option"><input type="radio" name="q2" value="d"> Zmienia się ich wartość</label>
+    <button type="button" onclick="checkRadio('q2','b','fb2','task2',1)">Sprawdź</button>
+    <div class="feedback" id="fb2"></div>
+  </div>
+</section>
+
+<section id="formatowanie">
+  <h2>4. Formatowanie warunkowe</h2>
+  <p>Excel może automatycznie zmieniać wygląd komórki zależnie od jej wartości.</p>
+  <div class="grid">
+    <div class="card hl-zero"><strong>Stan = 0</strong><p>Brak towaru.</p></div>
+    <div class="card hl-low"><strong>Stan &lt; 10</strong><p>Niski stan.</p></div>
+    <div class="card hl-high"><strong>Stan ≥ 50</strong><p>Bezpieczny zapas.</p></div>
+  </div>
+  <div class="warning" style="margin-top:16px">Formatowanie warunkowe zmienia wygląd komórki, ale nie jej wartość.</div>
+
+  <div class="task" id="task3">
+    <h3>Zadanie 3</h3>
+    <p>Jaki warunek ustawisz, aby wyróżnić wartości mniejsze niż 10?</p>
+    <input id="answer3" placeholder="Np. <20">
+    <button type="button" onclick="checkText('answer3','<10','fb3','task3',2)">Sprawdź</button>
+    <div class="feedback" id="fb3"></div>
+  </div>
+</section>
+
+<section id="symulator">
+  <h2>5. Interaktywny symulator magazynu</h2>
+  <p>Użyj filtrów i sortowania na przykładowej bazie.</p>
+
+  <div class="excel">
+    <div class="excel-toolbar">
+      <div class="toolbar-controls">
+        <select id="categoryFilter">
+          <option value="all">Wszystkie kategorie</option>
+          <option value="Palety">Palety</option>
+          <option value="Opakowania">Opakowania</option>
+          <option value="Zabezpieczenia">Zabezpieczenia</option>
+        </select>
+        <select id="stockFilter">
+          <option value="all">Dowolny stan</option>
+          <option value="low">Stan poniżej 10</option>
+          <option value="zero">Brak towaru</option>
+          <option value="high">Stan 50 lub więcej</option>
+        </select>
+        <select id="sortBy">
+          <option value="none">Bez sortowania</option>
+          <option value="priceAsc">Cena: rosnąco</option>
+          <option value="priceDesc">Cena: malejąco</option>
+          <option value="stockAsc">Stan: rosnąco</option>
+          <option value="stockDesc">Stan: malejąco</option>
+        </select>
+        <button type="button" class="blue" id="applyBtn">Zastosuj</button>
+        <button type="button" class="secondary" id="resetTableBtn">Wyczyść</button>
+      </div>
+    </div>
+
+    <table class="sheet">
+      <thead><tr><th>Kod</th><th>Produkt</th><th>Kategoria</th><th>Stan</th><th>Cena netto</th></tr></thead>
+      <tbody id="warehouseBody"></tbody>
+    </table>
+  </div>
+
+  <p class="muted" id="rowsInfo"></p>
+
+  <div class="task" id="task4">
+    <h3>Zadanie 4</h3>
+    <p>Ustaw kategorię <strong>Opakowania</strong> oraz <strong>stan poniżej 10</strong>. Ile produktów pozostanie?</p>
+    <input id="answer4" type="number" min="0" placeholder="Liczba produktów">
+    <button type="button" onclick="checkNumber('answer4',2,'fb4','task4',3)">Sprawdź</button>
+    <div class="feedback" id="fb4"></div>
+  </div>
+
+  <div class="task" id="task5">
+    <h3>Zadanie 5</h3>
+    <p>Jaki produkt jest najdroższy w całej bazie?</p>
+    <input id="answer5" placeholder="Wpisz nazwę produktu">
+    <button type="button" onclick="checkTextLoose('answer5','PALETA EUR','fb5','task5',4)">Sprawdź</button>
+    <div class="feedback" id="fb5"></div>
+  </div>
+</section>
+
+<section id="zadania">
+  <h2>6. Zadania praktyczne w Excelu</h2>
+
+  <div class="steps">
+    <div class="step"><strong>Otwórz arkusz magazynowy z poprzednich lekcji.</strong></div>
+    <div class="step"><strong>Włącz filtry w wierszu nagłówkowym.</strong></div>
+    <div class="step"><strong>Posortuj ceny malejąco.</strong></div>
+    <div class="step"><strong>Przefiltruj produkty o stanie mniejszym niż 10.</strong></div>
+    <div class="step"><strong>Dodaj formatowanie warunkowe dla kolumny Stan.</strong></div>
+  </div>
+
+  <div class="task" id="task6">
+    <h3>Zadanie 6 — sortowanie</h3>
+    <p>Posortuj swoją tabelę według ceny od najwyższej do najniższej.</p>
+    <label><input type="checkbox" id="done6" style="width:auto"> Gotowe</label>
+    <button type="button" onclick="markManual('done6','fb6','task6',5)">Zatwierdź</button>
+    <div class="feedback" id="fb6"></div>
+  </div>
+
+  <div class="task" id="task7">
+    <h3>Zadanie 7 — filtrowanie</h3>
+    <p>Wyświetl tylko produkty ze stanem poniżej 10.</p>
+    <label><input type="checkbox" id="done7" style="width:auto"> Gotowe</label>
+    <button type="button" onclick="markManual('done7','fb7','task7',6)">Zatwierdź</button>
+    <div class="feedback" id="fb7"></div>
+  </div>
+
+  <div class="task" id="task8">
+    <h3>Zadanie 8 — formatowanie warunkowe</h3>
+    <div class="formula-box">0 → czerwone tło<br>1–9 → żółte tło<br>50 i więcej → zielone tło</div>
+    <label><input type="checkbox" id="done8" style="width:auto"> Wszystkie trzy reguły ustawione</label>
+    <button type="button" onclick="markManual('done8','fb8','task8',7)">Zatwierdź</button>
+    <div class="feedback" id="fb8"></div>
+  </div>
+</section>
+
+<section id="quiz">
+  <h2>7. Quiz końcowy</h2>
+
+  <div class="task" id="task9">
+    <h3>Pytanie 1</h3>
+    <p>Jaka jest różnica między sortowaniem a filtrowaniem?</p>
+    <label class="quiz-option"><input type="radio" name="q9" value="a"> Sortowanie usuwa rekordy</label>
+    <label class="quiz-option"><input type="radio" name="q9" value="b"> Sortowanie zmienia kolejność, filtr ukrywa rekordy niespełniające warunku</label>
+    <label class="quiz-option"><input type="radio" name="q9" value="c"> Oba robią dokładnie to samo</label>
+    <label class="quiz-option"><input type="radio" name="q9" value="d"> Filtr działa tylko na tekście</label>
+    <button type="button" onclick="checkRadio('q9','b','fb9','task9',8)">Sprawdź</button>
+    <div class="feedback" id="fb9"></div>
+  </div>
+
+  <div class="task" id="task10">
+    <h3>Pytanie 2</h3>
+    <p>Czy formatowanie warunkowe zmienia wartość komórki?</p>
+    <label class="quiz-option"><input type="radio" name="q10" value="a"> Tak</label>
+    <label class="quiz-option"><input type="radio" name="q10" value="b"> Tylko dla liczb</label>
+    <label class="quiz-option"><input type="radio" name="q10" value="c"> Nie, zmienia tylko wygląd</label>
+    <label class="quiz-option"><input type="radio" name="q10" value="d"> Tylko przy filtrowaniu</label>
+    <button type="button" onclick="checkRadio('q10','c','fb10','task10',9)">Sprawdź</button>
+    <div class="feedback" id="fb10"></div>
+  </div>
+</section>
+
+<section>
+  <h2>8. Podsumowanie</h2>
+  <div class="result">
+    <div class="big"><span id="finalScore">0</span>/10</div>
+    <p id="finalText">Wykonuj zadania, aby zobaczyć postęp.</p>
+    <button type="button" class="secondary" onclick="resetLesson()">Zresetuj postęp</button>
+  </div>
+  <div class="callout" style="margin-top:18px">
+    <strong>Po tej lekcji uczeń powinien umieć:</strong> sortować dane, stosować filtry tekstowe i liczbowe oraz tworzyć podstawowe reguły formatowania warunkowego.
+  </div>
+</section>
+
+</main>
+
+<script>
+const completed=Array(10).fill(false);
+
+const warehouse=[
+  {code:'LOG001',name:'Paleta EUR',cat:'Palety',stock:25,price:65.00},
+  {code:'LOG002',name:'Folia stretch',cat:'Zabezpieczenia',stock:8,price:31.50},
+  {code:'LOG003',name:'Karton XL',cat:'Opakowania',stock:120,price:4.90},
+  {code:'LOG004',name:'Taśma pakowa',cat:'Zabezpieczenia',stock:4,price:7.20},
+  {code:'LOG005',name:'Karton M',cat:'Opakowania',stock:6,price:2.80},
+  {code:'LOG006',name:'Paleta przemysłowa',cat:'Palety',stock:0,price:54.00},
+  {code:'LOG007',name:'Koperta kurierska',cat:'Opakowania',stock:7,price:1.20},
+  {code:'LOG008',name:'Narożnik ochronny',cat:'Zabezpieczenia',stock:75,price:3.40},
+  {code:'LOG009',name:'Karton S',cat:'Opakowania',stock:95,price:1.90},
+  {code:'LOG010',name:'Folia bąbelkowa',cat:'Zabezpieczenia',stock:55,price:18.50}
+];
+
+function updateProgress(){
+  const score=completed.filter(Boolean).length;
+  document.getElementById('score').textContent=score;
+  document.getElementById('finalScore').textContent=score;
+  document.getElementById('progressBar').style.width=(score/10*100)+'%';
+  const t=document.getElementById('finalText');
+  if(score===10)t.textContent='Świetnie! Lekcja ukończona w 100%.';
+  else if(score>=8)t.textContent='Bardzo dobrze — umiesz już sprawnie analizować tabelę.';
+  else if(score>=5)t.textContent='Dobry postęp. Zostało jeszcze kilka ćwiczeń.';
+  else t.textContent='Wykonuj zadania, aby zobaczyć postęp.';
+}
+
+function complete(index,taskId){
+  completed[index]=true;
+  document.getElementById(taskId).classList.add('done');
+  updateProgress();
+}
+
+function checkRadio(name,correct,feedbackId,taskId,index){
+  const checked=document.querySelector('input[name="'+name+'"]:checked');
+  const fb=document.getElementById(feedbackId);
+  if(!checked){fb.textContent='Wybierz odpowiedź.';fb.className='feedback bad';return}
+  if(checked.value===correct){
+    fb.textContent='✓ Poprawna odpowiedź!';
+    fb.className='feedback ok';
+    complete(index,taskId);
+  }else{
+    fb.textContent='✗ Niepoprawnie. Spróbuj ponownie.';
+    fb.className='feedback bad';
+  }
+}
+
+function checkText(inputId,correct,feedbackId,taskId,index){
+  const value=document.getElementById(inputId).value.trim().replace(/\s/g,'').toUpperCase();
+  const expected=correct.replace(/\s/g,'').toUpperCase();
+  const fb=document.getElementById(feedbackId);
+  if(value===expected){
+    fb.textContent='✓ Poprawnie!';
+    fb.className='feedback ok';
+    complete(index,taskId);
+  }else{
+    fb.textContent='✗ Spróbuj ponownie.';
+    fb.className='feedback bad';
+  }
+}
+
+function checkTextLoose(inputId,correct,feedbackId,taskId,index){
+  const value=document.getElementById(inputId).value.trim().toUpperCase();
+  const fb=document.getElementById(feedbackId);
+  if(value===correct){
+    fb.textContent='✓ Poprawnie!';
+    fb.className='feedback ok';
+    complete(index,taskId);
+  }else{
+    fb.textContent='✗ Posortuj ceny malejąco i sprawdź pierwszy produkt.';
+    fb.className='feedback bad';
+  }
+}
+
+function checkNumber(inputId,correct,feedbackId,taskId,index){
+  const value=Number(document.getElementById(inputId).value);
+  const fb=document.getElementById(feedbackId);
+  if(value===correct){
+    fb.textContent='✓ Poprawnie!';
+    fb.className='feedback ok';
+    complete(index,taskId);
+  }else{
+    fb.textContent='✗ Ustaw oba filtry i policz widoczne rekordy.';
+    fb.className='feedback bad';
+  }
+}
+
+function markManual(checkId,feedbackId,taskId,index){
+  const checked=document.getElementById(checkId).checked;
+  const fb=document.getElementById(feedbackId);
+  if(checked){
+    fb.textContent='✓ Zadanie oznaczone jako wykonane.';
+    fb.className='feedback ok';
+    complete(index,taskId);
+  }else{
+    fb.textContent='Najpierw wykonaj zadanie i zaznacz pole.';
+    fb.className='feedback bad';
+  }
+}
+
+function renderTable(rows){
+  const body=document.getElementById('warehouseBody');
+  body.innerHTML='';
+  rows.forEach(r=>{
+    const tr=document.createElement('tr');
+    const cls=r.stock===0?'hl-zero':(r.stock<10?'hl-low':(r.stock>=50?'hl-high':''));
+    tr.innerHTML=
+      '<td>'+r.code+'</td>'+
+      '<td>'+r.name+'</td>'+
+      '<td>'+r.cat+'</td>'+
+      '<td class="'+cls+'">'+r.stock+'</td>'+
+      '<td>'+r.price.toFixed(2).replace('.',',')+' zł</td>';
+    body.appendChild(tr);
+  });
+  document.getElementById('rowsInfo').textContent='Widoczne rekordy: '+rows.length+' z '+warehouse.length;
+}
+
+function applyTable(){
+  const category=document.getElementById('categoryFilter').value;
+  const stockFilter=document.getElementById('stockFilter').value;
+  const sortBy=document.getElementById('sortBy').value;
+  let rows=[...warehouse];
+
+  if(category!=='all')rows=rows.filter(r=>r.cat===category);
+  if(stockFilter==='low')rows=rows.filter(r=>r.stock<10);
+  if(stockFilter==='zero')rows=rows.filter(r=>r.stock===0);
+  if(stockFilter==='high')rows=rows.filter(r=>r.stock>=50);
+
+  if(sortBy==='priceAsc')rows.sort((a,b)=>a.price-b.price);
+  if(sortBy==='priceDesc')rows.sort((a,b)=>b.price-a.price);
+  if(sortBy==='stockAsc')rows.sort((a,b)=>a.stock-b.stock);
+  if(sortBy==='stockDesc')rows.sort((a,b)=>b.stock-a.stock);
+
+  renderTable(rows);
+}
+
+document.getElementById('applyBtn').addEventListener('click',applyTable);
+document.getElementById('resetTableBtn').addEventListener('click',()=>{
+  document.getElementById('categoryFilter').value='all';
+  document.getElementById('stockFilter').value='all';
+  document.getElementById('sortBy').value='none';
+  renderTable(warehouse);
+});
+
+function resetLesson(){
+  for(let i=0;i<completed.length;i++)completed[i]=false;
+  document.querySelectorAll('.task').forEach(x=>x.classList.remove('done'));
+  document.querySelectorAll('.feedback').forEach(x=>{x.textContent='';x.className='feedback'});
+  document.querySelectorAll('input').forEach(el=>{
+    if(el.type==='checkbox'||el.type==='radio')el.checked=false;
+    else el.value='';
+  });
+  updateProgress();
+}
+
+renderTable(warehouse);
+updateProgress();
+</script>
+</body>
+</html>
